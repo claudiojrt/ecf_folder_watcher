@@ -10,8 +10,9 @@ namespace FolderWatcher
     public class SysTrayApp : Form
     {
         FileSystemWatcher watcher;
-        NotifyIcon  trayIcon;
+        NotifyIcon trayIcon;
         ContextMenu trayMenu;
+
         string folder;
 
         [STAThread]
@@ -27,7 +28,7 @@ namespace FolderWatcher
  
             base.OnLoad(e);
         }
- 
+
         private SysTrayApp()
         {
             trayMenu = new ContextMenu();
@@ -43,21 +44,44 @@ namespace FolderWatcher
             };
 
             watcher = new FileSystemWatcher();
-            Run(folder);
+
+            folder = Preferences.GetPreference("Folder").ToString();
+
+            if (string.IsNullOrEmpty(folder))
+            {
+                ChangeFolder();
+
+                //Se na inicialização não informar pasta, não faz nada
+                if (string.IsNullOrEmpty(folder))
+                {
+                    return;
+                }
+            }
+
+            Run();
         }
 
         private void OnChangeFolder(object sender, EventArgs e)
         {
             watcher.EnableRaisingEvents = false;
 
+            ChangeFolder();
+            
+            Run();
+        }
+
+        private void ChangeFolder()
+        {
             FolderWatcherForm form = new FolderWatcherForm(folder);
             form.ShowDialog();
 
-            folder = form.folder;
-            
-            Run(form.folder);
+            if (Directory.Exists(form.folder))
+            {
+                folder = form.folder;
+                Preferences.SetPreference("Folder", folder);
+            }
         }
- 
+
         private void OnExit(object sender, EventArgs e)
         {
             Application.Exit();
@@ -76,29 +100,24 @@ namespace FolderWatcher
         }
 
         [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
-        private void Run(object data)
+        private void Run()
         {
-            if (Directory.Exists(data.ToString()))
+            if (!string.IsNullOrEmpty(folder))
             {
-                watcher.Path = data.ToString();
-            }
-            else
-            {
-                folder = @"P:\Cigam11\Projects\Compras\Cab";
                 watcher.Path = folder;
+
+                watcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName;
+
+                watcher.Filter = "*.ecf";
+
+                watcher.IncludeSubdirectories = true;
+
+                watcher.Changed += OnChanged;
+                watcher.Deleted += OnChanged;
+                watcher.Renamed += OnChanged;
+
+                watcher.EnableRaisingEvents = true;
             }
-
-            watcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName;
-
-            watcher.Filter = "*.ecf";
-
-            watcher.IncludeSubdirectories = true;
-
-            watcher.Changed += OnChanged;
-            watcher.Deleted += OnChanged;
-            watcher.Renamed += OnChanged;
-
-            watcher.EnableRaisingEvents = true;
         }
 
        private void OnChanged(object source, FileSystemEventArgs e)

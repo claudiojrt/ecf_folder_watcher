@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.IO;
 using System.Windows.Forms;
 
 namespace FolderWatcher
@@ -11,13 +13,45 @@ namespace FolderWatcher
         {
             InitializeComponent();
             this.folder = folder;
-            caminho.Text = folder;
+            Caminho.Text = folder;
         }
 
         private void Confirmar_Click(object sender, EventArgs e)
         {
-            folder = caminho.Text;
+            folder = Caminho.Text;
             ActiveForm.Close();
+        }
+
+        private void Caminho_Leave(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(Caminho.Text))
+            {
+                Caminho.Select(0, Caminho.Text.Length);
+                Caminho.Focus();
+
+                MessageBox.Show("Caminho inválido.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            bool bHandled = false;
+
+            switch (keyData)
+            {
+                case Keys.F5:
+
+                    if (folderDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        folder = folderDialog.SelectedPath;
+                        Caminho.Text = folder;
+                    }
+
+                    bHandled = true;
+
+                    break;
+            }
+            return bHandled;
         }
     }
 }

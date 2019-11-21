@@ -30,8 +30,9 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FolderWatcherForm));
             this.label1 = new System.Windows.Forms.Label();
-            this.caminho = new System.Windows.Forms.TextBox();
+            this.Caminho = new System.Windows.Forms.TextBox();
             this.Confirmar = new System.Windows.Forms.Button();
+            this.folderDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.SuspendLayout();
             // 
             // label1
@@ -43,12 +44,15 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Caminho";
             // 
-            // caminho
+            // Caminho
             // 
-            this.caminho.Location = new System.Drawing.Point(64, 10);
-            this.caminho.Name = "caminho";
-            this.caminho.Size = new System.Drawing.Size(410, 20);
-            this.caminho.TabIndex = 1;
+            this.Caminho.Location = new System.Drawing.Point(64, 10);
+            this.Caminho.MaxLength = 500;
+            this.Caminho.Name = "Caminho";
+            this.Caminho.Size = new System.Drawing.Size(410, 20);
+            this.Caminho.TabIndex = 1;
+            this.Caminho.Tag = "Caminho";
+            this.Caminho.Leave += new System.EventHandler(this.Caminho_Leave);
             // 
             // Confirmar
             // 
@@ -60,6 +64,12 @@
             this.Confirmar.UseVisualStyleBackColor = true;
             this.Confirmar.Click += new System.EventHandler(this.Confirmar_Click);
             // 
+            // folderDialog
+            // 
+            this.folderDialog.Description = "Selecione o caminho";
+            this.folderDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.folderDialog.ShowNewFolderButton = false;
+            // 
             // FolderWatcherForm
             // 
             this.AcceptButton = this.Confirmar;
@@ -67,7 +77,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(485, 71);
             this.Controls.Add(this.Confirmar);
-            this.Controls.Add(this.caminho);
+            this.Controls.Add(this.Caminho);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -83,8 +93,9 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox caminho;
+        private System.Windows.Forms.TextBox Caminho;
         private System.Windows.Forms.Button Confirmar;
+        private System.Windows.Forms.FolderBrowserDialog folderDialog;
     }
 }
 
