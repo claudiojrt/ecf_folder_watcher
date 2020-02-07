@@ -1,44 +1,136 @@
 ﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Reflection;
 using System.IO;
 using System.Security.Permissions;
-using System.Windows.Forms;
 
-public class FolderWatcher
+namespace FolderWatcher
 {
-    public static void Main()
+    public class SysTrayApp : Form
     {
-        Run();
-    }
+        FileSystemWatcher watcher;
+        NotifyIcon trayIcon;
+        ContextMenu trayMenu;
 
-    [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
-    public static void Run()
-    {
-        using (FileSystemWatcher watcher = new FileSystemWatcher())
+        string folder;
+
+        [STAThread]
+        public static void Main()
         {
-            Console.WriteLine("Path: ");
-            watcher.Path = Console.ReadLine();
+            Application.Run(new SysTrayApp());
+        }
 
-            // Filtra apenas alterações de escrita e nome de arquivo
-            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+        protected override void OnLoad(EventArgs e)
+        {
+            Visible = false;
+            ShowInTaskbar = false;
+ 
+            base.OnLoad(e);
+        }
 
-            watcher.Filter = "*.txt";
+        private SysTrayApp()
+        {
+            trayMenu = new ContextMenu();
+            trayMenu.MenuItems.Add("Change Folder", OnChangeFolder);
+            trayMenu.MenuItems.Add("Exit", OnExit);
 
-            watcher.IncludeSubdirectories = true;
+            trayIcon = new NotifyIcon
+            {
+                Text = ".ecf Folder Watcher",
+                Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location),
+                ContextMenu = trayMenu,
+                Visible = true
+            };
 
-            // Add event handlers.
-            watcher.Changed += OnChanged;
-            watcher.Created += OnChanged;
-            watcher.Deleted += OnChanged;
-            watcher.Renamed += OnChanged;
+            watcher = new FileSystemWatcher();
 
-            // Begin watching.
-            watcher.EnableRaisingEvents = true;
+            folder = Preferences.GetPreference("Folder").ToString();
 
-            while (Console.ReadLine().ToLower() != "q") ;
+            if (string.IsNullOrEmpty(folder))
+            {
+                ChangeFolder();
+
+                //Se na inicialização não informar pasta, não faz nada
+                if (string.IsNullOrEmpty(folder))
+                {
+                    return;
+                }
+            }
+
+            Run();
+        }
+
+        private void OnChangeFolder(object sender, EventArgs e)
+        {
+            watcher.EnableRaisingEvents = false;
+
+            ChangeFolder();
+            
+            Run();
+        }
+
+        private void ChangeFolder()
+        {
+            FolderWatcherForm form = new FolderWatcherForm(folder);
+            form.ShowDialog();
+
+            if (Directory.Exists(form.folder))
+            {
+                folder = form.folder;
+                Preferences.SetPreference("Folder", folder);
+            }
+        }
+
+        private void OnExit(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+ 
+        protected override void Dispose(bool isDisposing)
+        {
+            if (isDisposing)
+            {
+                watcher.Dispose();
+                trayIcon.Dispose();
+                trayMenu.Dispose();
+            }
+ 
+            base.Dispose(isDisposing);
+        }
+
+        [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
+        private void Run()
+        {
+            if (!string.IsNullOrEmpty(folder))
+            {
+                watcher.Path = folder;
+
+                watcher.NotifyFilter = NotifyFilters.Size | NotifyFilters.FileName;
+
+                watcher.Filter = "*.ecf";
+
+                watcher.IncludeSubdirectories = true;
+
+                watcher.Changed += OnChanged;
+                watcher.Deleted += OnChanged;
+                watcher.Renamed += OnChanged;
+
+                watcher.EnableRaisingEvents = true;
+            }
+        }
+
+       private void OnChanged(object source, FileSystemEventArgs e)
+        {
+            try
+            {
+                watcher.EnableRaisingEvents = false;
+                MessageBox.Show($"File: {e.FullPath} {e.ChangeType}", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            }
+            finally
+            {
+                watcher.EnableRaisingEvents = true;
+            }
         }
     }
-
-    private static void OnChanged(object source, FileSystemEventArgs e) =>
-        MessageBox.Show($"File: {e.FullPath} {e.ChangeType}", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-
 }

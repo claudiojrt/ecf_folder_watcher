@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // As informações gerais sobre um assembly são controladas por
 // conjunto de atributos. Altere estes valores de atributo para modificar as informações
 // associada a um assembly.
-[assembly: AssemblyTitle("FolderWatcher")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("ecf Folder Watcher")]
+[assembly: AssemblyDescription("Monitora alterações em arquivos .ecf em uma determinada pasta.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FolderWatcher")]
+[assembly: AssemblyProduct("ecf Folder Watcher")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // O GUID a seguir será destinado à ID de typelib se este projeto for exposto para COM
-[assembly: Guid("aba9f103-8b6a-4f53-a63e-79dcbba5ea5e")]
+[assembly: Guid("a7bd4429-787a-4dfb-be2b-251dc52cc0a4")]
 
 // As informações da versão de um assembly consistem nos quatro valores a seguir:
 //
